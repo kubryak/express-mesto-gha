@@ -1,14 +1,18 @@
 const User = require('../models/user');
 
+const {
+  ERROR_INACCURATE_DATA,
+  ERROR_NOT_FOUND,
+  ERROR_INTERNAL_SERVER,
+} = require('../utils/errors');
+
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => res
-      .status(500)
+    .catch(() => res
+      .status(ERROR_INTERNAL_SERVER)
       .send({
-        message: 'Internal Server Error',
-        err: err.message,
-        stack: err.stack,
+        message: 'Внутренняя ошибка сервера',
       }));
 };
 
@@ -17,17 +21,23 @@ const getUserById = (req, res) => {
     .orFail(() => new Error('Not found'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.message === 'Not found') {
+      if (err.name === 'CastError') {
         res
-          .status(404)
+          .status(ERROR_INACCURATE_DATA)
           .send({
-            message: 'User not found',
+            message: 'Переданы некорректные данны при поиске пользователя по id',
+          });
+      } else if (err.message === 'Not found') {
+        res
+          .status(ERROR_NOT_FOUND)
+          .send({
+            message: 'Пользователь по указанному id не найден',
           });
       } else {
         res
-          .status(500)
+          .status(ERROR_INTERNAL_SERVER)
           .send({
-            message: 'Internal Server Error',
+            message: 'Внутренняя ошибка сервера',
             err: err.message,
             stack: err.stack,
           });
@@ -38,17 +48,67 @@ const getUserById = (req, res) => {
 const createUser = (req, res) => {
   User.create(req.body)
     .then((user) => res.status(201).send(user))
-    .catch((err) => res
-      .status(500)
-      .send({
-        message: 'Internal Server Error',
-        err: err.message,
-        stack: err.stack,
-      }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(ERROR_INACCURATE_DATA)
+          .send({
+            message: 'Переданы некорректные данные при создании пользователя',
+          });
+      } else {
+        res
+          .status(ERROR_INTERNAL_SERVER)
+          .send({
+            message: 'Внутренняя ошибка сервера',
+            err: err.message,
+            stack: err.stack,
+          });
+      }
+    });
+};
+
+const updateUser = (req, res) => {
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true },
+  )
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERROR_INACCURATE_DATA).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+      } else if (err.name === 'CastError') {
+        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь с указанным id не найден' });
+      } else {
+        res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера' });
+      }
+    });
+};
+
+const updateUserAvatar = (req, res) => {
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(
+    req.use._id,
+    { avatar },
+    { new: true, runValidators: true },
+  )
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERROR_INACCURATE_DATA).send({ message: 'Переданы некорректные данные при обновлении аватара' });
+      } else if (err.name === 'CastError') {
+        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь с указанным id не найден' });
+      } else {
+        res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера' });
+      }
+    });
 };
 
 module.exports = {
   getUsers,
   getUserById,
   createUser,
+  updateUser,
+  updateUserAvatar,
 };
