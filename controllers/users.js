@@ -18,7 +18,7 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params.id)
-    .orFail(() => new Error('Not found'))
+    .orFail(() => new Error('Not Found'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -27,7 +27,7 @@ const getUserById = (req, res) => {
           .send({
             message: 'Переданы некорректные данны при поиске пользователя по id',
           });
-      } else if (err.message === 'Not found') {
+      } else if (err.message === 'Not Found') {
         res
           .status(ERROR_NOT_FOUND)
           .send({
