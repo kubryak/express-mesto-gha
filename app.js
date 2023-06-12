@@ -6,10 +6,6 @@ const app = express();
 
 mongoose.connect('mongodb://127.0.0.1:27017/mydb');
 
-app.use(express.json());
-
-app.use(router);
-
 app.use((req, res, next) => {
   req.user = {
     _id: '648713b158f447fbdf156a88',
@@ -17,6 +13,10 @@ app.use((req, res, next) => {
 
   next();
 });
+
+app.use(express.json());
+
+app.use(router);
 
 app.listen(3000, () => {
   console.log('Слушаю порт 3000');
