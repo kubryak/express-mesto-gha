@@ -8,7 +8,7 @@ const {
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) => res.send(users))
     .catch(() => res
       .status(ERROR_INTERNAL_SERVER)
       .send({
@@ -19,7 +19,7 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   User.findById(req.params.id)
     .orFail(() => new Error('Not Found'))
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         res
@@ -74,11 +74,12 @@ const updateUser = (req, res) => {
     { name, about },
     { new: true, runValidators: true },
   )
+    .orFail(() => new Error('Not Found'))
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(ERROR_INACCURATE_DATA).send({ message: 'Переданы некорректные данные при обновлении профиля' });
-      } else if (err.name === 'CastError') {
+      } else if (err.message === 'Not Found') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь с указанным id не найден' });
       } else {
         res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера' });
@@ -93,11 +94,12 @@ const updateUserAvatar = (req, res) => {
     { avatar },
     { new: true, runValidators: true },
   )
+    .orFail(() => new Error('Not Found'))
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(ERROR_INACCURATE_DATA).send({ message: 'Переданы некорректные данные при обновлении аватара' });
-      } else if (err.name === 'CastError') {
+      } else if (err.message === 'Not Found') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь с указанным id не найден' });
       } else {
         res.status(ERROR_INTERNAL_SERVER).send({ message: 'Внутренняя ошибка сервера' });
