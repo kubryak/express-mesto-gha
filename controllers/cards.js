@@ -66,7 +66,7 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(NotFoundError('Передан несуществующий _id карточки'))
+    .orFail(new NotFoundError('Передан несуществующий _id карточки'))
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
