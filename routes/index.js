@@ -11,7 +11,7 @@ router.use('/signup', celebrates.validateCreateAndLoginUser, createUser);
 router.use(auth);
 router.use('/users', userRoutes);
 router.use('/cards', cardRoutes);
-router.use('/*', (req, res) => {
+router.use('/*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
