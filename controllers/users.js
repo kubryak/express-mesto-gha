@@ -100,7 +100,7 @@ const login = (req, res, next) => {
               _id: user._id,
             }, 'super_strong_password');
             res.cookie('jwt', jwt, {
-              maxAge: 3600000 * 24 * 7,
+              maxAge: 3600 * 24 * 7,
               httpOnly: true,
               sameSite: true,
             });
