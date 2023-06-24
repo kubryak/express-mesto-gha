@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const { regexImageLink } = require('../utils/constants');
 
-
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
