@@ -9,11 +9,12 @@ const errorHandler = require('./middlewares/error');
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
 const app = express();
-app.use(cookieParser);
 
 mongoose.connect(DB_URL);
 
 app.use(express.json());
+
+app.use(cookieParser());
 
 app.use(helmet());
 
